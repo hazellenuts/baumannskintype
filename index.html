@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baumann Skin Type Quiz</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .quiz-container { max-width: 600px; margin: auto; }
+    .question { margin-bottom: 20px; }
+    .answers { list-style-type: none; padding: 0; }
+    .answers li { margin: 10px 0; }
+    .buttons { display: flex; justify-content: space-between; }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>Baumann Skin Type Quiz</h1>
+    <div id="quiz"></div>
+    <div class="buttons">
+      <button id="prev">Previous</button>
+      <button id="next">Next</button>
+    </div>
+  </div>
+  <script src="quizData.js"></script>
+  <script>
+    let currentPartIndex = 0;
+    let currentQuestionIndex = 0;
+    let scores = [];
+
+    function renderQuestion() {
+      const part = quizData.quiz.parts[currentPartIndex];
+      const question = part.questions[currentQuestionIndex];
+      const quizDiv = document.getElementById('quiz');
+      quizDiv.innerHTML = `
+        <h2>${part.title}</h2>
+        <div class="question">
+          <p>${question.question}</p>
+        </div>
+        <ul class="answers">
+          ${question.answers
+            .map((a, i) => `<li><label><input type="radio" name="answer" value="${a.score}"> ${a.text}</label></li>`)
+            .join('')}
+        </ul>
+      `;
+    }
+
+    document.getElementById('next').addEventListener('click', () => {
+      const selected = document.querySelector('input[name="answer"]:checked');
+      if (!selected) {
+        alert('Please select an answer!');
+        return;
+      }
+      scores.push(Number(selected.value));
+      currentQuestionIndex++;
+      const part = quizData.quiz.parts[currentPartIndex];
+      if (currentQuestionIndex >= part.questions.length) {
+        currentQuestionIndex = 0;
+        currentPartIndex++;
+        if (currentPartIndex >= quizData.quiz.parts.length) {
+          alert('Quiz Completed!');
+          console.log('Final Scores:', scores);
+          return;
+        }
+      }
+      renderQuestion();
+    });
+
+    document.getElementById('prev').addEventListener('click', () => {
+      if (currentQuestionIndex > 0) currentQuestionIndex--;
+      else if (currentPartIndex > 0) {
+        currentPartIndex--;
+        currentQuestionIndex = quizData.quiz.parts[currentPartIndex].questions.length - 1;
+      }
+      renderQuestion();
+    });
+
+    renderQuestion();
+  </script>
+</body>
+</html>
